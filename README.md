@@ -6,6 +6,24 @@ This repository documents my journey of building a data warehouse using SQL Serv
 
 ---
 
+## 🎯 Project Overview
+
+This project involves:
+
+1. **Data Architecture**: Designing a modern data warehouse using the Medallion Architecture (Bronze, Silver, and Gold layers).
+2. **ETL Pipelines**: Extracting, transforming, and loading data from ERP and CRM source systems into the warehouse.
+3. **Data Modeling**: Developing fact and dimension tables optimized for analytical queries using a star schema.
+4. **Analytics**: Creating SQL-based reports and queries to generate actionable insights from the integrated data.
+
+This repository serves as a hands-on portfolio project showcasing skills in:
+- SQL development
+- Data architecture and modeling
+- ETL pipeline development
+- Data cleaning and integration
+- Documentation and best practices in data engineering
+
+---
+
 ## 📋 Project Requirements
 
 ### Building the Data Warehouse (Data Engineering)
