@@ -1,70 +1,75 @@
 ## 📦 Data Catalog – Gold Layer
 
-The Gold layer is where everything comes together. After all the cleaning and 
-standardization done in the Silver layer, the Gold layer transforms that data 
-into something analysts can actually use — a clean Star Schema with two 
-dimension tables and one fact table.
+Once the data passes through Bronze and Silver, the Gold layer is the finish 
+line. This is where raw, messy source data finally becomes something a business 
+analyst can open and immediately make sense of. The model follows a Star Schema 
+— two dimension tables describing *who* and *what*, and one fact table capturing 
+*what happened*.
 
 ---
 
 ### 🧑‍💼 gold.dim_customers
 
-This view brings together customer data from both the CRM and ERP systems into 
-one clean, reliable customer profile. Gender is sourced from CRM as the primary 
-system, with ERP data used as a fallback wherever CRM has gaps.
+Every customer record in this view is a result of merging two source systems — 
+CRM and ERP — into a single, trustworthy profile. One thing worth noting: 
+gender data comes from CRM as the preferred source, but where CRM falls short, 
+ERP steps in as a backup. Small detail, but it matters when your analysis 
+depends on it.
 
 | Column Name | Data Type | Description |
 |---|---|---|
-| customer_key | INT | Surrogate primary key, auto-generated for each customer |
-| customer_id | INT | Original customer ID from the CRM system |
-| customer_number | NVARCHAR(50) | Unique customer code used across systems |
+| customer_key | INT | Surrogate key — system generated, used for joins |
+| customer_id | INT | Original customer ID as it exists in CRM |
+| customer_number | NVARCHAR(50) | Business-facing customer code |
 | first_name | NVARCHAR(50) | Customer's first name |
 | last_name | NVARCHAR(50) | Customer's last name |
-| country | NVARCHAR(50) | Country of residence, sourced from ERP location data |
-| marital_status | NVARCHAR(50) | Customer's marital status |
-| gender | NVARCHAR(50) | Gender — CRM is primary source, ERP used as fallback |
-| birthdate | DATE | Date of birth, sourced from ERP |
-| create_date | DATE | Date the customer record was first created in CRM |
+| country | NVARCHAR(50) | Country pulled from ERP location records |
+| marital_status | NVARCHAR(50) | Marital status from CRM |
+| gender | NVARCHAR(50) | CRM-first, ERP as fallback, 'n/a' if neither available |
+| birthdate | DATE | Date of birth from ERP |
+| create_date | DATE | When the customer was first added to CRM |
 
 ---
 
 ### 📦 gold.dim_products
 
-A clean product reference table built from CRM product records enriched with 
-ERP category information. Only active products are included here — anything 
-with an end date (i.e. discontinued products) is filtered out intentionally.
+This view only includes products that are currently active — discontinued items 
+are deliberately excluded by filtering out anything with an end date. The 
+product details come from CRM, while category and subcategory information is 
+enriched from the ERP side.
 
 | Column Name | Data Type | Description |
 |---|---|---|
-| product_key | INT | Surrogate primary key, auto-generated for each product |
-| product_id | INT | Original product ID from the CRM system |
-| product_number | NVARCHAR(50) | Unique product code used across systems |
-| product_name | NVARCHAR(50) | Full name of the product |
-| category_id | NVARCHAR(50) | Category identifier linked to ERP category data |
-| category | NVARCHAR(50) | High-level product category from ERP |
-| subcategory | NVARCHAR(50) | More specific product grouping from ERP |
-| maintenance | NVARCHAR(50) | Maintenance classification of the product |
-| cost | INT | Cost of the product |
-| product_line | NVARCHAR(50) | Product line the item belongs to |
-| start_date | DATE | Date the product became active |
+| product_key | INT | Surrogate key — system generated, used for joins |
+| product_id | INT | Original product ID from CRM |
+| product_number | NVARCHAR(50) | Business-facing product code |
+| product_name | NVARCHAR(50) | Full product name |
+| category_id | NVARCHAR(50) | ID used to link to ERP category data |
+| category | NVARCHAR(50) | Top-level product category from ERP |
+| subcategory | NVARCHAR(50) | More granular product grouping from ERP |
+| maintenance | NVARCHAR(50) | Maintenance type classification |
+| cost | INT | Product cost at time of record |
+| product_line | NVARCHAR(50) | Which product line this item belongs to |
+| start_date | DATE | Date the product went live |
 
 ---
 
 ### 🛒 gold.fact_sales
 
-The core of the star schema — every sales transaction lives here. Each row 
-represents a single order line and connects back to both the customer and 
-product dimensions through surrogate keys, making it straightforward to 
-slice and dice sales data any way you need.
+This is the heart of the model. Each row here is one sales transaction — tied 
+to a specific customer and product through surrogate keys. If you want to know 
+what sold, to whom, when, and for how much — this is the table you query. Keep 
+in mind this table references the dimension views, so always make sure those 
+exist before querying here.
 
 | Column Name | Data Type | Description |
 |---|---|---|
-| order_number | NVARCHAR(50) | Unique identifier for each sales order |
-| product_key | INT | Foreign key linking to gold.dim_products |
-| customer_key | INT | Foreign key linking to gold.dim_customers |
-| order_date | DATE | Date the order was placed |
-| shipping_date | DATE | Date the order was shipped out |
-| due_date | DATE | Expected delivery date for the order |
-| sales_amount | INT | Total sales value for the order line |
-| quantity | INT | Number of units ordered |
-| price | INT | Unit price at the time of the order |
+| order_number | NVARCHAR(50) | Unique ID for each sales order |
+| product_key | INT | Links to gold.dim_products |
+| customer_key | INT | Links to gold.dim_customers |
+| order_date | DATE | When the order was placed |
+| shipping_date | DATE | When the order left the warehouse |
+| due_date | DATE | Expected delivery date |
+| sales_amount | INT | Total value of the order line |
+| quantity | INT | Units ordered |
+| price | INT | Price per unit at time of sale |
