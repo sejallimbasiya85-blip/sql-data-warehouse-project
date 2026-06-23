@@ -1,0 +1,37 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment and credentials
+*.env
+*.config
+secrets.ini
+
+# SQL Server database files
+*.mdf
+*.ldf
+*.ndf
+
+# Backup and temporary files
+*.bak
+*.tmp
+*.log
+*.swp
+
+# IDE and editor folders
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Output and generated files
+*.csv
+*.pdf
+*.png
+*.xlsx
+
+# Notes and scratch files
+notes.txt
+scratch/
+todo.txt
